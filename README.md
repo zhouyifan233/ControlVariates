@@ -1,4 +1,6 @@
 # ControlVariates
+Still under construction, but should be able to use. Any comments are welcome.
+
 Postprocess MCMC samples using control variates to get samples with small variance.
 
 Bridgestan (python version) is used to expose necessary parameters. 
