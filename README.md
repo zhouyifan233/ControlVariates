@@ -34,13 +34,21 @@ https://ieeexplore.ieee.org/document/9944852
 Please consider cite our work if you find it useful:
 
 @ARTICLE{9944852,
+
   author={Maskell, Simon and Zhou, Yifan and Mira, Antonietta},
+  
   journal={IEEE Signal Processing Letters}, 
+  
   title={Control Variates for Constrained Variables}, 
+  
   year={2022},
+  
   volume={29},
+  
   number={},
+  
   pages={2333-2337},
+  
   doi={10.1109/LSP.2022.3221347}}
 
 
