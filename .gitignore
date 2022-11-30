@@ -1,0 +1,6 @@
+__pycache__/
+
+*.so
+
+stan_benchmark/*/*.hpp
+
