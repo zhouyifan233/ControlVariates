@@ -6,7 +6,7 @@ Still under construction, but should be able to use. Any comments are welcome.
 
 The processing chain is:
 
-'''
+```
 1. Draw samples using any tool. (e.g. pystan3)
 
 2. Generate a matrix including the samples. (e.g. pystan3samples_to_matrix() in postprocess_bs.py)
@@ -14,19 +14,19 @@ The processing chain is:
 3. Extract gradient of log-probability. (e.g. using bridgestan to expose (see run_postprocess() in postprocess_bs.py))
 
 4. Construct control variates and generate new samples. (see controlvariates_basics.py)
-'''
+```
 
 # Requirement
 
-1. Installed and compiled [CmdStan](https://github.com/stan-dev/cmdstan)
+- Installed and compiled [CmdStan](https://github.com/stan-dev/cmdstan)
 
-2. The example uses pystan3 to generate MCMC samples:
+- The example uses pystan3 to generate MCMC samples:
 
 ```shell
 $ pip install pystan
 ```
 
-3. Any dependants that are required by cmdstan and pystan3.
+- Any dependants that are required by cmdstan and pystan3.
 
 # Install
 
@@ -49,6 +49,7 @@ You can try different models: just change exp_path (line 12).
 
 # Paper
 [Control Variates for Constrained Variables](https://ieeexplore.ieee.org/document/9944852)
+
 
 Please consider cite our work if you find it useful:
 
