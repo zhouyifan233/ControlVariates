@@ -1,4 +1,6 @@
 # ControlVariates
+Still under construction, but should be able to use. Any comments are welcome.
+
 
 "Control variates" is a postprocess technique to reduce the variance of MCMC samples. It can achieve better approximation of expectation of random variables with small number of samples, see the example in example_cv.py.
 
