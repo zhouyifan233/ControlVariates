@@ -1,7 +1,6 @@
 import copy
 import time
 import numpy as np
-import scipy as sp
 from controlvariates.controlvariates_basics import linear_control_variates, quadratic_control_variates
 
 
