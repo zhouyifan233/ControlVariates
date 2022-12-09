@@ -8,8 +8,9 @@ from bridgestan.python.bridgestan.compile import set_cmdstan_path
 # set cmdstan path
 set_cmdstan_path('../cmdstan/')
 
-# importing the module
-exp_path = 'stan_benchmark/low_dim_gauss_mix/low_dim_gauss_mix'
+# module path
+exp_path = 'stan_benchmark/gp_regr/gp_regr'
+# exp_path = 'bridgestan/test_models/logistic/logistic'
 model_path = exp_path + '.stan'
 data_path = exp_path + '.data.json'
 
@@ -22,7 +23,7 @@ with open(data_path) as json_file:
     data = json.load(json_file)
 
 posterior = stan.build(model_str, data=data)
-fit = posterior.sample(num_chains=3, num_samples=100, num_warmup=200)
+fit = posterior.sample(num_chains=3, num_samples=500, num_warmup=500)
 #f = fit.to_frame()  # pandas `DataFrame, requires pandas
 
 # initialise BridgeStan
@@ -38,8 +39,8 @@ constrained_samples, name_parameters = pystan3samples_to_matrix(samples, fit.num
 cv_samples, times = run_postprocess(constrained_samples, model, cv_mode='linear', output_squared_samples=False, output_runtime=True)
 cv_samples_quadratic, times_quadratic = run_postprocess(constrained_samples, model, cv_mode='quadratic', output_squared_samples=False, output_runtime=True)
 
-# evaluate
-fit_larger = posterior.sample(num_chains=3, num_samples=500, num_warmup=10000)
+# evaluate using a very large number of samples
+fit_larger = posterior.sample(num_chains=3, num_samples=10000, num_warmup=10000)
 samples_larger = {}
 for name in fit_larger.param_names:
     samples_larger[name] = fit_larger[name]

@@ -1,5 +1,7 @@
+# See paper: "Control Variates for Constrained Variables"
+# Link: https://ieeexplore.ieee.org/document/9944852
+# 
 import numpy as np
-import scipy as sp
 
 
 def linear_control_variates(samples, grad_log_prob):
@@ -11,9 +13,8 @@ def linear_control_variates(samples, grad_log_prob):
         sc_cov = np.cov(sc_matrix.T)
         Sigma_cs = sc_cov[0:dim, dim:dim*2].T
         Sigma_cc = sc_cov[dim:dim*2, dim:dim*2]
+        zv = -np.linalg.solve(Sigma_cc, Sigma_cs).T @ control.T
 
-        inv_Sigma_cc = sp.linalg.inv(Sigma_cc)
-        zv = (-inv_Sigma_cc @ Sigma_cs).T @ control.T
         linear_cv_samples = samples + zv.T
     except:
         linear_cv_samples = np.empty_like(samples)
@@ -48,9 +49,8 @@ def quadratic_control_variates(constrained_samples, unconstrained_samples, grad_
         sc_cov = np.cov(sc_matrix)
         Sigma_cs = sc_cov[0:dim_constrained_samples, dim_constrained_samples:dim_constrained_samples+dim_control].T
         Sigma_cc = sc_cov[dim_constrained_samples:dim_constrained_samples+dim_control, dim_constrained_samples:dim_constrained_samples+dim_control]
+        zv = -np.linalg.solve(Sigma_cc, Sigma_cs).T @ control.T
 
-        inv_Sigma_cc = sp.linalg.inv(Sigma_cc)
-        zv = (-inv_Sigma_cc @ Sigma_cs).T @ control.T
         quad_cv_samples = constrained_samples + zv.T
     except:
         quad_cv_samples = np.empty_like(constrained_samples)
