@@ -9,7 +9,7 @@ from bridgestan.python.bridgestan.compile import set_cmdstan_path
 set_cmdstan_path('../cmdstan/')
 
 # module path
-exp_path = 'stan_benchmark/gp_regr/gp_regr'
+exp_path = 'stan_benchmark/arma/arma'
 # exp_path = 'bridgestan/test_models/logistic/logistic'
 model_path = exp_path + '.stan'
 data_path = exp_path + '.data.json'
