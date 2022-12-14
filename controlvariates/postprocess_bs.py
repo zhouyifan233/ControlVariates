@@ -1,7 +1,7 @@
 import copy
 import time
 import numpy as np
-from controlvariates.controlvariates_basics import linear_control_variates, quadratic_control_variates
+from controlvariates.controlvariates_basics import linear_control_variates, linear_control_variates_loo, quadratic_control_variates, quadratic_control_variates_loo
 
 
 def pystan3samples_to_matrix(samples, num_samples, model_bs):
@@ -15,7 +15,7 @@ def pystan3samples_to_matrix(samples, num_samples, model_bs):
             samples_flatten_per_param.append(flatten_.tolist())
         samples_flatten[name] = np.array(samples_flatten_per_param)
 
-    name_parameters = model_bs.param_names(include_tp=False, include_gq=True)
+    name_parameters = model_bs.param_names(include_tp=False, include_gq=False)
     constrained_samples = []
     for name in name_parameters:
         dot_position = name.find('.')
@@ -31,7 +31,7 @@ def pystan3samples_to_matrix(samples, num_samples, model_bs):
     return constrained_samples, name_parameters
 
 
-def run_postprocess(samples, model_bs, cv_mode='linear', output_squared_samples=False, output_runtime=False):
+def run_postprocess(samples, model_bs, cv_mode='linear', loo=False, output_squared_samples=False, output_runtime=False):
     num_samples = samples.shape[0]
 
     # Unconstraint mcmc samples.
@@ -52,11 +52,17 @@ def run_postprocess(samples, model_bs, cv_mode='linear', output_squared_samples=
     # Run control variates
     cv_start_time = time.time()
     if cv_mode == 'linear':
-        cv_samples = linear_control_variates(samples, grad_log_prob_vals)
+        if loo == True:
+            cv_samples = linear_control_variates_loo(samples, grad_log_prob_vals)
+        else:
+            cv_samples = linear_control_variates(samples, grad_log_prob_vals)
         cv_runtime = time.time() - cv_start_time
         # print('Gradient time: {:.05f} --- Linear control variate time: {:.05f}.'.format(grad_runtime, cv_runtime))
     elif cv_mode == 'quadratic':
-        cv_samples = quadratic_control_variates(samples, unconstrained_samples, grad_log_prob_vals)
+        if loo == True:
+            cv_samples = quadratic_control_variates_loo(samples, unconstrained_samples, grad_log_prob_vals)
+        else:
+            cv_samples = quadratic_control_variates(samples, unconstrained_samples, grad_log_prob_vals)
         cv_runtime = time.time() - cv_start_time
         # print('Gradient time: {:.05f} --- Quadratic control variate time: {:.05f}.'.format(grad_runtime, cv_runtime))
     else:
