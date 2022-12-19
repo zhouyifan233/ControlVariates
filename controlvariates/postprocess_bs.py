@@ -15,7 +15,7 @@ def pystan3samples_to_matrix(samples, num_samples, model_bs):
             samples_flatten_per_param.append(flatten_.tolist())
         samples_flatten[name] = np.array(samples_flatten_per_param)
 
-    name_parameters = model_bs.param_names(include_tp=False, include_gq=True)
+    name_parameters = model_bs.param_names(include_tp=False, include_gq=False)
     constrained_samples = []
     for name in name_parameters:
         dot_position = name.find('.')
