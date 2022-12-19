@@ -1,3 +1,4 @@
+import os
 import stan
 import json
 import bridgestan.python.bridgestan as bs
@@ -9,7 +10,7 @@ from bridgestan.python.bridgestan.compile import set_cmdstan_path
 set_cmdstan_path('../cmdstan/')
 
 # module path
-exp_path = 'stan_benchmark/arma/arma'
+exp_path = 'stan_benchmark/low_dim_corr_gauss/low_dim_corr_gauss'
 # exp_path = 'bridgestan/test_models/logistic/logistic'
 model_path = exp_path + '.stan'
 data_path = exp_path + '.data.json'
@@ -19,15 +20,18 @@ with open(model_path) as model_file:
     model_str = model_file.read()
 
 # Opening JSON file
-with open(data_path) as json_file:
-    data = json.load(json_file)
-
-posterior = stan.build(model_str, data=data)
-fit = posterior.sample(num_chains=3, num_samples=500, num_warmup=500)
+if os.path.exists(data_path):
+    with open(data_path) as json_file:
+        data = json.load(json_file)
+    posterior = stan.build(model_str, data=data)
+    # initialise BridgeStan
+    model = bs.StanModel.from_stan_file(model_path, data_path)
+else:
+    posterior = stan.build(model_str)
+    # initialise BridgeStan
+    model = bs.StanModel.from_stan_file(model_path)
+fit = posterior.sample(num_chains=3, num_samples=200, num_warmup=5000)
 #f = fit.to_frame()  # pandas `DataFrame, requires pandas
-
-# initialise BridgeStan
-model = bs.StanModel.from_stan_file(model_path, data_path)
 
 # extract samples from pystan3
 samples = {}
@@ -36,11 +40,11 @@ for name in fit.param_names:
 constrained_samples, name_parameters = pystan3samples_to_matrix(samples, fit.num_chains*fit.num_samples, model)
 
 # post-process using control variates
-cv_samples, times = run_postprocess(constrained_samples, model, cv_mode='linear', output_squared_samples=False, output_runtime=True)
-cv_samples_quadratic, times_quadratic = run_postprocess(constrained_samples, model, cv_mode='quadratic', output_squared_samples=False, output_runtime=True)
+cv_samples, cv_samples_suqared, times = run_postprocess(constrained_samples, model, cv_mode='linear', output_squared_samples=True, output_runtime=True)
+cv_samples_quadratic, cv_samples_quadratic_suqared, times_quadratic = run_postprocess(constrained_samples, model, cv_mode='quadratic', output_squared_samples=True, output_runtime=True)
 
 # evaluate using a very large number of samples
-fit_larger = posterior.sample(num_chains=3, num_samples=10000, num_warmup=10000)
+fit_larger = posterior.sample(num_chains=3, num_samples=5000, num_warmup=50000)
 samples_larger = {}
 for name in fit_larger.param_names:
     samples_larger[name] = fit_larger[name]
@@ -68,3 +72,16 @@ larger_samples_var = np.var(constrained_samples_larger, axis=0)
 print('larger raw sample (as groundtruth) variances:')
 print(larger_samples_var)
 print('- - - - - - - - - - - - - - - - - - - - - - ')
+
+# estimate variance or (standard deviation^2)
+expect_x = np.mean(cv_samples, axis=0)
+expect_x_squared = np.mean(cv_samples_suqared, axis=0)
+cv_linear_estimate_var = np.sqrt(expect_x_squared - expect_x**2) ** 2
+print('estimated variances using CV linear:')
+print(cv_linear_estimate_var)
+
+expect_x_quad = np.mean(cv_samples_quadratic, axis=0)
+expect_x_squared_quad = np.mean(cv_samples_quadratic_suqared, axis=0)
+cv_quad_estimate_var = np.sqrt(expect_x_squared_quad - expect_x_quad**2) ** 2
+print('estimated variances using CV quadratic:')
+print(cv_quad_estimate_var)

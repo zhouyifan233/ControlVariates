@@ -17,7 +17,6 @@ def linear_control_variates(samples, grad_log_prob):
         Sigma_cs = sc_cov[0:dim, dim:dim*2].T
         Sigma_cc = sc_cov[dim:dim*2, dim:dim*2]
         zv = -np.linalg.solve(Sigma_cc, Sigma_cs).T @ control.T
-        print(control.shape)
 
         linear_cv_samples = samples + zv.T
     except:
@@ -47,7 +46,6 @@ def quadratic_control_variates(constrained_samples, unconstrained_samples, grad_
             dim_control = dim_unconstrained_samples+dim_unconstrained_samples
             z = -0.5 * grad_log_prob
             control = np.concatenate((z, (unconstrained_samples*z - 0.5)), axis=1)
-        print(control.shape)
         sc_matrix = np.concatenate((constrained_samples.T, control.T), axis=0)
         sc_cov = np.cov(sc_matrix)
         Sigma_cs = sc_cov[0:dim_constrained_samples, dim_constrained_samples:dim_constrained_samples+dim_control].T

@@ -15,7 +15,7 @@ def pystan3samples_to_matrix(samples, num_samples, model_bs):
             samples_flatten_per_param.append(flatten_.tolist())
         samples_flatten[name] = np.array(samples_flatten_per_param)
 
-    name_parameters = model_bs.param_names(include_tp=False, include_gq=True)
+    name_parameters = model_bs.param_names(include_tp=False, include_gq=False)
     constrained_samples = []
     for name in name_parameters:
         dot_position = name.find('.')
@@ -44,7 +44,7 @@ def run_postprocess(samples, model_bs, cv_mode='linear', output_squared_samples=
     grad_start_time = time.time()
     grad_log_prob_vals = []
     for i in range(num_samples):
-        log_p, grad = model_bs.log_density_gradient(copy.copy(unconstrained_samples[i]), propto=True, jacobian=True)
+        log_p, grad = model_bs.log_density_gradient(copy.copy(unconstrained_samples[i]), propto=False, jacobian=True)
         grad_log_prob_vals.append(grad)
     grad_log_prob_vals = np.array(grad_log_prob_vals)
     grad_runtime = time.time() - grad_start_time
