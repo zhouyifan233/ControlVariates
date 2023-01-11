@@ -30,7 +30,7 @@ else:
     posterior = stan.build(model_str)
     # initialise BridgeStan
     model = bs.StanModel.from_stan_file(model_path)
-fit = posterior.sample(num_chains=3, num_samples=200, num_warmup=5000)
+fit = posterior.sample(num_chains=3, num_samples=50, num_warmup=1000)
 #f = fit.to_frame()  # pandas `DataFrame, requires pandas
 
 # extract samples from pystan3
@@ -44,7 +44,7 @@ cv_samples, cv_samples_suqared, times = run_postprocess(constrained_samples, mod
 cv_samples_quadratic, cv_samples_quadratic_suqared, times_quadratic = run_postprocess(constrained_samples, model, cv_mode='quadratic', output_squared_samples=True, output_runtime=True)
 
 # evaluate using a very large number of samples
-fit_larger = posterior.sample(num_chains=3, num_samples=5000, num_warmup=50000)
+fit_larger = posterior.sample(num_chains=3, num_samples=10000, num_warmup=50000)
 samples_larger = {}
 for name in fit_larger.param_names:
     samples_larger[name] = fit_larger[name]

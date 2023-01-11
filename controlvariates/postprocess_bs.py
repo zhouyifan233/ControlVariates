@@ -44,7 +44,7 @@ def run_postprocess(samples, model_bs, cv_mode='linear', output_squared_samples=
     grad_start_time = time.time()
     grad_log_prob_vals = []
     for i in range(num_samples):
-        log_p, grad = model_bs.log_density_gradient(copy.copy(unconstrained_samples[i]), propto=False, jacobian=True)
+        log_p, grad = model_bs.log_density_gradient(copy.copy(unconstrained_samples[i]), propto=True, jacobian=True)
         grad_log_prob_vals.append(grad)
     grad_log_prob_vals = np.array(grad_log_prob_vals)
     grad_runtime = time.time() - grad_start_time
