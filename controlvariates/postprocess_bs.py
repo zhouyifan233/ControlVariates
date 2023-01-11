@@ -1,7 +1,7 @@
 import copy
 import time
 import numpy as np
-from controlvariates.controlvariates_basics import linear_control_variates, quadratic_control_variates
+from controlvariates.controlvariates_basics import linear_control_variates, quadratic_control_variates, quadratic_control_variates_v2
 
 
 def pystan3samples_to_matrix(samples, num_samples, model_bs):
@@ -54,28 +54,31 @@ def run_postprocess(samples, model_bs, cv_mode='linear', output_squared_samples=
     if cv_mode == 'linear':
         cv_samples = linear_control_variates(samples, grad_log_prob_vals)
         cv_runtime = time.time() - cv_start_time
+        return cv_samples, (grad_runtime, cv_runtime)
         # print('Gradient time: {:.05f} --- Linear control variate time: {:.05f}.'.format(grad_runtime, cv_runtime))
     elif cv_mode == 'quadratic':
         cv_samples = quadratic_control_variates(samples, unconstrained_samples, grad_log_prob_vals)
+        cv_samples_v2 = quadratic_control_variates_v2(samples, unconstrained_samples, grad_log_prob_vals)
         cv_runtime = time.time() - cv_start_time
         # print('Gradient time: {:.05f} --- Quadratic control variate time: {:.05f}.'.format(grad_runtime, cv_runtime))
+        return cv_samples, cv_samples_v2, (grad_runtime, cv_runtime)
     else:
         print('The mode of control variates must be linear or quadratic.')
         return None
 
-    if output_squared_samples == True:
-        # the squared samples are used for calculating the standard deviation of the problem.
-        if cv_mode == 'linear':
-            cv_samples_suqared = linear_control_variates(samples**2, grad_log_prob_vals)
-        elif cv_mode == 'quadratic':
-            cv_samples_suqared = quadratic_control_variates(samples**2, unconstrained_samples, grad_log_prob_vals)
-        if output_runtime:
-            return cv_samples, cv_samples_suqared, (grad_runtime, cv_runtime)
-        else:
-            return cv_samples, cv_samples_suqared
-    else:
-        if output_runtime:
-            return cv_samples, (grad_runtime, cv_runtime)
-        else:
-            return cv_samples
+    # if output_squared_samples == True:
+    #     # the squared samples are used for calculating the standard deviation of the problem.
+    #     if cv_mode == 'linear':
+    #         cv_samples_suqared = linear_control_variates(samples**2, grad_log_prob_vals)
+    #     elif cv_mode == 'quadratic':
+    #         cv_samples_suqared = quadratic_control_variates(samples**2, unconstrained_samples, grad_log_prob_vals)
+    #     if output_runtime:
+    #         return cv_samples, cv_samples_suqared, (grad_runtime, cv_runtime)
+    #     else:
+    #         return cv_samples, cv_samples_suqared
+    # else:
+    #     if output_runtime:
+    #         return cv_samples, (grad_runtime, cv_runtime)
+    #     else:
+    #         return cv_samples
     

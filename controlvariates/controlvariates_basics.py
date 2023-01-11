@@ -58,3 +58,40 @@ def quadratic_control_variates(constrained_samples, unconstrained_samples, grad_
         quad_cv_samples[:] = np.nan
 
     return quad_cv_samples
+
+
+def quadratic_control_variates_v2(constrained_samples, unconstrained_samples, grad_log_prob):
+    try:
+        num_samples_total = constrained_samples.shape[0]
+        dim_constrained_samples = constrained_samples.shape[1]
+        dim_unconstrained_samples = unconstrained_samples.shape[1]
+        dim_cp = int(0.5*dim_unconstrained_samples*(dim_unconstrained_samples-1))
+        dim_control = dim_unconstrained_samples+dim_unconstrained_samples+dim_cp+dim_cp
+        if num_samples_total > dim_control:
+            z = -0.5 * grad_log_prob
+            control = np.concatenate((z, (unconstrained_samples*z - 0.5)), axis=1)
+            control_parts_1 = np.zeros((num_samples_total, dim_cp))
+            control_parts_2 = np.zeros((num_samples_total, dim_cp))
+            for i in range(2, dim_unconstrained_samples+1):
+                for j in range(1, i):
+                    ind = int(0.5*(2*dim_unconstrained_samples-j)*(j-1)) + (i-j)
+                    control_parts_1[:,ind-1] = unconstrained_samples[:,i-1]*z[:,j-1]
+                    control_parts_2[:,ind-1] = unconstrained_samples[:,j-1]*z[:,i-1]
+            control = np.concatenate((control, control_parts_1, control_parts_2), axis=1)
+        else:
+            print('WARNING... The number of samples is smaller than the number of control variates, using reduced control variates for the quadratic version.')
+            dim_control = dim_unconstrained_samples+dim_unconstrained_samples
+            z = -0.5 * grad_log_prob
+            control = np.concatenate((z, (unconstrained_samples*z - 0.5)), axis=1)
+        sc_matrix = np.concatenate((constrained_samples.T, control.T), axis=0)
+        sc_cov = np.cov(sc_matrix)
+        Sigma_cs = sc_cov[0:dim_constrained_samples, dim_constrained_samples:dim_constrained_samples+dim_control].T
+        Sigma_cc = sc_cov[dim_constrained_samples:dim_constrained_samples+dim_control, dim_constrained_samples:dim_constrained_samples+dim_control]
+        zv = -np.linalg.solve(Sigma_cc, Sigma_cs).T @ control.T
+
+        quad_cv_samples = constrained_samples + zv.T
+    except:
+        quad_cv_samples = np.empty_like(constrained_samples)
+        quad_cv_samples[:] = np.nan
+
+    return quad_cv_samples
