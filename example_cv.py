@@ -4,13 +4,14 @@ import json
 import bridgestan.python.bridgestan as bs
 import numpy as np
 from controlvariates.postprocess_bs import run_postprocess, pystan3samples_to_matrix
-from bridgestan.python.bridgestan.compile import set_cmdstan_path
+# from bridgestan.python.bridgestan.compile import set_cmdstan_path
 
 # set cmdstan path
-set_cmdstan_path('../cmdstan/')
+# set_cmdstan_path('../cmdstan/')
 
 # module path
-exp_path = 'stan_benchmark/low_dim_corr_gauss/low_dim_corr_gauss'
+model_name = 'arma'
+exp_path = 'stan_benchmark/' + model_name + '/' + model_name
 # exp_path = 'bridgestan/test_models/logistic/logistic'
 model_path = exp_path + '.stan'
 data_path = exp_path + '.data.json'
