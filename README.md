@@ -18,15 +18,13 @@ The processing chain is:
 
 # Requirement
 
-- Installed and compiled [CmdStan](https://github.com/stan-dev/cmdstan)
-
 - The example uses pystan3 to generate MCMC samples:
 
 ```shell
 $ pip install pystan
 ```
 
-- Any dependants that are required by cmdstan and pystan3.
+- Any dependants that are required by pystan3.
 
 # Install
 
@@ -34,7 +32,7 @@ $ pip install pystan
 $ git clone https://github.com/zhouyifan233/ControlVariates --recursive
 ```
 
-Bridgestan will be automatically downloaded.
+Bridgestan 1.0.0 will be automatically downloaded.
 
 # Run example
 
