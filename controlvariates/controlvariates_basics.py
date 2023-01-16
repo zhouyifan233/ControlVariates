@@ -1,6 +1,9 @@
 # See paper: "Control Variates for Constrained Variables"
 # Link: https://ieeexplore.ieee.org/document/9944852
 # 
+# Note that we have considered a leave-one-out estimator but not found it to make 
+# a statistically significant improvement in performance in the contexts we have considered.
+# See branch "Leave-one-out-alpha"
 import numpy as np
 
 
@@ -50,10 +53,9 @@ def quadratic_control_variates(constrained_samples, unconstrained_samples, grad_
         num_samples_total = constrained_samples.shape[0]
         dim_constrained_samples = constrained_samples.shape[1]
         dim_unconstrained_samples = unconstrained_samples.shape[1]
-        
-        if dim_unconstrained_samples < 50:
-            dim_cp = int(0.5*dim_unconstrained_samples*(dim_unconstrained_samples-1))
-            dim_control = dim_unconstrained_samples+dim_unconstrained_samples+dim_cp
+        dim_cp = int(0.5*dim_unconstrained_samples*(dim_unconstrained_samples-1))
+        dim_control = dim_unconstrained_samples+dim_unconstrained_samples+dim_cp
+        if num_samples_total > dim_control:
             z = -0.5 * grad_log_prob
             control = np.concatenate((z, (unconstrained_samples*z - 0.5)), axis=1)
             control_parts = np.zeros((num_samples_total, dim_cp))
@@ -63,11 +65,10 @@ def quadratic_control_variates(constrained_samples, unconstrained_samples, grad_
                     control_parts[:,ind-1] = unconstrained_samples[:,i-1]*z[:,j-1] + unconstrained_samples[:,j-1]*z[:,i-1]
             control = np.concatenate((control, control_parts), axis=1)
         else:
-            print('WARNING... The dimentionality of the problem is too large ( > 50), using reduced control variates for the quadratic version.')
+            print('WARNING... The number of samples is smaller than the number of control variates, using reduced control variates for the quadratic version.')
             dim_control = dim_unconstrained_samples+dim_unconstrained_samples
             z = -0.5 * grad_log_prob
             control = np.concatenate((z, (unconstrained_samples*z - 0.5)), axis=1)
-        
         sc_matrix = np.concatenate((constrained_samples.T, control.T), axis=0)
         sc_cov = np.cov(sc_matrix)
         Sigma_cs = sc_cov[0:dim_constrained_samples, dim_constrained_samples:dim_constrained_samples+dim_control].T

@@ -1,16 +1,18 @@
+import os
 import stan
 import json
 import bridgestan.python.bridgestan as bs
 import numpy as np
 from controlvariates.postprocess_bs import run_postprocess, pystan3samples_to_matrix
-from bridgestan.python.bridgestan.compile import set_cmdstan_path
+# from bridgestan.python.bridgestan.compile import set_cmdstan_path
 
 # set cmdstan path
-set_cmdstan_path('../cmdstan/')
+# set_cmdstan_path('../cmdstan/')
 
 # module path
-exp_path = 'stan_benchmark/garch/garch'
-# exp_path = 'bridgestan/test_models/eight_schools/eight_schools'
+model_name = 'arma'
+exp_path = 'stan_benchmark/' + model_name + '/' + model_name
+# exp_path = 'bridgestan/test_models/logistic/logistic'
 model_path = exp_path + '.stan'
 data_path = exp_path + '.data.json'
 
@@ -19,15 +21,19 @@ with open(model_path) as model_file:
     model_str = model_file.read()
 
 # Opening JSON file
-with open(data_path) as json_file:
-    data = json.load(json_file)
+if os.path.exists(data_path):
+    with open(data_path) as json_file:
+        data = json.load(json_file)
+    posterior = stan.build(model_str, data=data)
+    # initialise BridgeStan
+    model = bs.StanModel.from_stan_file(model_path, data_path)
+else:
+    posterior = stan.build(model_str)
+    # initialise BridgeStan
+    model = bs.StanModel.from_stan_file(model_path)
 
-posterior = stan.build(model_str, data=data)
-fit = posterior.sample(num_chains=2, num_samples=50, num_warmup=1000)
+fit = posterior.sample(num_chains=3, num_samples=50, num_warmup=500)
 #f = fit.to_frame()  # pandas `DataFrame, requires pandas
-
-# initialise BridgeStan
-model = bs.StanModel.from_stan_file(model_path, data_path)
 
 # extract samples from pystan3
 samples = {}
